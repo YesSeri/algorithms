@@ -1,0 +1,9 @@
+* Easier c programming
+
+#+begin_src bash
+alias mc='make clean'
+alias m='make'
+alias gt='gdbtui ./first'
+alias mr='./first "7" "10 200 75 5 25 50 100"'
+watchexec --project-origin . make
+#+end_src

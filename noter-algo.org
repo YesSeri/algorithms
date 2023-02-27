@@ -1,0 +1,969 @@
+:PROPERTIES:
+:END:
+#+STARTUP: show2levels
+
+* Egna noter
+** Merge sort
+#+end_example
+
+Merge sort is a divide and conquer sorting algorithm.
+
+*** Divide and conquer
+We divide a problem into smaller and smaller pieces until we encounter a base case and then we solve the simple base case. We then combine the small solutions into a bigger solution.
+
+**Divide:** Divide the subarray `A[p:r]` in half. Do that by first calculating mid index `q` and then call function on each half, `A[p:q]` and `A[q+1:r]`.
+
+**Conquer:** Perform relevant operation on `A[p:q]` and `A[q+1:r]`.
+
+**Combine:** Merge the subarrays `A[p:q]` and `A[q+1:r]` producing the desired array `A[p:r]`.
+
+
+*** Analysis
+
+Here’s how to set up the recurrence for T(n), the worst-case running time of merge
+sort on n numbers.
+
+**Divide:** The divide step just computes the middle of the subarray, which takes constant time. Thus, $D(n)=\theta$(1).
+
+**Conquer:** Recursively solving two subproblems, each of size n/2, contributes $2T(n/2)$ to the running time (ignoring the floors and ceilings, as we discussed).
+
+**Combine:** Since the MERGE procedure on an n-element subarray takes $\theta(n)$ time, we have $C(n)=\theta(n)$
+
+*** My thoughts
+
+The worst case time is $\theta(n\times lg(n))$
+
+The reason for this is the following.
+
+$lg(n)$ comes from this: We divide the number of elements in half each time. So if we have 32 elements we divide it 5 times. That is the same as $lg(32)=5$
+
+$n$ comes from this: When we combine the elements back together we need to make $n$ checks.
+
+
+*** Exercises
+
+**** 2.3-8
+Describe an algorithm that, given a set `S` of `n` integers and another integer `x` , determines whether S contains two elements that sum to exactly `x`. Your algorithm should take $\theta (n\times lg(n))$ time in the worst case.
+
+** Glossary
+
+------------------------------------------------
+term           	meaning
+-------------- 	--------------------------------
+keys			elements to be sorted
+
+satellite data	data associated with the element
+
+record			satellite data + key
+
+------------------------------------------------
+:Terms for data when sorting
+
+
+-------------------------------------------------------------------------------------------
+term			meaning
+--------------	---------------------------------------------------------------------------
+initialization	true for the loop invariant before the first iteration
+
+maintenance	if true before iteration of loop, it is also true before next iteration
+
+termination	when loop terminates this property helps show that the algorithm is correct
+
+-------------------------------------------------------------------------------------------
+:Terms used when describing a loop invariant
+
+
+initialization + maintenance enables mathematical induction to prove loop-invariant.
+
+termination makes sure that the loop stops when a certain conditions are met.
+
+** 2.1
+If we have a table of students, and we sort the students according to grade, then both the key and the satellite data gets moved to the new position.
+
+** Insertion Sort
+```python
+for i = 2 to n
+	key = A[i]
+	j = i — 1
+	while j > 0 and A[j] > key
+		A [j+1] = A[j]
+		j = j - 1
+	A [j+1] = key
+```
+
+*** Loop invariant
+
+**Initialization:** At the start the subarray `A[1:i-1]`, `A[1:1]`, consists of one element. A single element is always sorted, hence the subarray is sorted.
+
+**Maintenance:** In the while loop, we move the value at `A[i-1]`, `A[i-2]`, etc. one step to the right, when we find the correct place for our key we stop the loop and insert our key there.
+
+**Termination:** Finally we examine loop termination. The loop variable `i` starts at 2 and increases by 1 until becoming larger than n. If we substitute `i` with `n/+1` in the loop invariant we can see that it yields the sub array `A[1:n]` which is the same as the original array but in sorted order.
+
+
+*** My explanation
+- Loop from 2nd key to last key, var idx.
+- For each key:
+	- x = idx - 1
+	- While key is smaller than previous and previous idx > 0
+		- Move previous key one step to the right.
+		- Decrease current idx by one.
+
+*** Exercises
+
+**** 2.1-1
+> Using Figure 2.2 as a model, illustrate the operation of INSERTION-SORT on an array initially containing the sequence [31; 41; 59; 26; 41; 58].
+
+-----------------
+1  2  3  4  5  6
+-- -- -- -- -- --
+31 41 59 26 41 58
+
+31 41 59 26 41 58
+
+31 41 59 26 41 58
+
+26 31 41 59 41 58
+
+26 31 41 41 59 58
+-----------------
+:solution showing array values after each iteration of outer for loop.
+
+
+
+#+begin_example
+[31; 41; 59; 26; 41; 58]
+    |<-
+[31; 41; 59; 26; 41; 58]
+        |<-
+[31; 41; 59; 26; 41; 58]
+ ->  ->  ->
+ |<-----------
+
+[26; 31; 41; 59; 41; 58]
+              ->
+             |<---
+
+[26; 31; 41; 41; 59; 58]
+                  ->
+                 |<---
+                 
+** Hash table
+We exploit the fact that it takes $\theta (1)$ to look up the index of an array. This is of course much faster than searching a sorted array, which takes $\theta (log(n))$
+The trade-off is that we will use more memory to store the keys for the index, which may or may not be worth it.
+
+*** Basics
+
+We have a hash function.
+
+> A hash function is a mathematical function that maps keys to integers. Skiena, Algo Design Manual
+
+This means for a value of `x`, once it is hashed it always becomes `y`. We use `y` as a key in our array, and store `x` at its location. `y` will usually be a big integer.
+#+begin_src python
+x = 15
+y = hash(x)
+A[y] = x
+#+end_src
+
+We do this for all values we have in array. If we later have a value z and want to see if it exists in the array, we just hash the value and look it up.
+
+#+begin_src python
+z = 15
+y = hash(z)
+val = A[y]
+if exists(val)
+	print("exists")
+else
+	print("doesn't exist")
+#+end_src
+
+
+There are two problems.
+
+One problem is that the size of our hash is extremely large. We need a way to reduce the size of our hash table to only be from `0..m-1`, where `m` is the size of our hash table, which should be as small as possible while still begin efficient for lookups.The second problem is that when we reduce the size of our array, we greatly increases the risk of two values becoming the same hash value. We need a way to handle collisions.
+
+*** Size problem
+
+If $H()$ is our hashing function and $S$ is our value, we take $H(S)=hash \mod{m}$, and insert our value `S` into bucket `A[H(S) mod m]`.
+
+*** Collision problem
+
+The smaller the size of our hash table, the more often we will have collisions. According to good practice, SO and others, the hash table should be about 1.3 times greater than the number of elements it should hold. This ensures an average lookup time of $\theta (1)$
+
+**** Chaining
+Den enklaste lösningen är att låta vårt hash table vara en array som innehåller linked lists. Detta kallas "chaining".
+
+We insert our value into the correct bucket if the bucket is empty. If it is not empty it will contains a node in a linked list. We point the pointer of the linked list to a new node containing the value to be inserted.
+
+When we want to search our hash table we hash the search term and look it up in our hash table and compare it to the nodes in the ll, until we find it or there are no more elements in the linked list.
+
+The linked list can be doubly linked, increasing the memory usage but simplifying the deletion of items.
+
+**** Open addressing
+A different solution is to use open addressing.
+
+We insert our value into the first free slot into the hash table. When we want to look it up we go to the slot in the array and keep going forward in the array until we find an empty slot, meaning the value doesn't yet exist, or until it is found.
+
+** Binary tree
+** Rooted tree with unbounded branching
+
+[[file:imgs/Screenshot-from-2023-02-22-14-04-37.png]]
+- Rooted tree means that every node has a parent except the root node.
+- Unbounded branching means there is no restriction on how many children a parent can have.
+  There is a smart trick to making these efficient.
+
+  Since we don't know how many children each node will have we need to come up with a smart way of making it efficient.
+
+  If we implement siblings as a linked list, and the parent node only has a pointer to the first sibling, then we don't need to know beforehand how much memory to allocate.
+
+* Lektioner
+** Vecka 1
+** Vecka 2
+with Eva Rotenberg
+
+## Search 
+
+Given a sorted array and a value `x`, find if there is an index `i` so `A[i] == x` 
+ - input = Sorted array `A`, element `x`
+ - output=  there is idx i so `A[i]` = `x`? true/false.
+
+### Linear Search
+
+Go through the array and check all elements until your element is found or you have gone through whole `A`.
+
+ - Time: $\theta (n)$
+ - Pro: Also works on non-sorted arrays.
+ - Con: Slow
+
+### Binary Search
+
+Look at mid element. If `x` is lower, search left, if element is higher, search right, else return index, because we have found `x` in `A`.
+
+1. `A[m] = x -> return true`
+2. `A[m] < x -> recursively continue for right subarray`
+3. `A[m] < x -> recursively continue for left subarray`
+4. `search range < 0 -> return false`
+
+ - Time: $\theta (n)$
+
+**Analysis**: 
+ - Hvert rekursivt kald tager konstant tid. 
+ - Hver gang halveres intervallet
+ - When interval is `<= 1` is there `<= 1` iteration left until we stop.
+ - That is why time is $\theta (log(n))$
+
+**Alt Analysis**: 
+ - Binary search of arrray length n takes $T(n)$ time
+We solve the recursive equation for T(n)
+
+$T(n) = T(n/2) + c\sb{1}$ `if n > 1`
+
+$T(n) = c\sb{2}$ `if n <= 1`
+
+$T(n) = T(n/2) + c\sb{1}$
+
+$= T(n/4) + c\sb{1} + c\sb{1}$
+
+$= T(n/8) + c\sb{1} + c\sb{1} + c\sb{1}$
+
+$...$
+
+$= T(n/2^k) + k * c\sb{1}$
+
+$...$
+
+$= T(n/2^{log2(n)}) + log\sb{2} (n) * c\sb{1}$
+
+$= T(1) + c\sb{1} * log\sb{2}(n)$
+
+$= c\sb{2} + c\sb{1} * log\sb{2}(n)$
+
+This gives us $\theta (log(n))$
+
+
+
+
+## Sorting
+
+### Insertion Sort
+
+### Merge Sort
+
+ - If `|A|` <= 1 then `A` is sorted, so return `A`.
+ - Else divide A into two subarray.
+ - Merge sort the two halves
+ - Merge the sorted halves and return result.
+
+**Time:** Runtime is $T(n)$ when `A` has length `n`. What is $T(n)$? We create a recursion tree.
+
+TODO look at slides
+
+Merge sort is a divide and conquer algorithm.
+
+** Vecka 3
+
+- Worst case
+- Best case
+- Average case
+
+Generellt är vi intresserade av worst case.
+
+*** Big O-notation
+
+```
+f(n)=O(g(n))
+if
+f(n) <= c\cdot g(n)
+where n->inf/large value
+```
+
+O(g(n)) är ett set/mängde av funktioner.
+
+$f(n) \in O(g(n))$
+
+*** Symboler
+
+**** Omega - $\Omega$
+
+$\Omega$ anger ett lägsta gränsvärde.
+
+$f(n) = \Omega(g(n))$ if $f(n) \leq c\cdot g(n), \lim{n \to \infty}$
+
+**** Big O - $O$
+
+$O$ anger ett högsta gränsvärde.
+
+$f(n) = O(g(n))$ if $f(n) \geq c\cdot g(n), \lim{n \to \infty}$
+
+**** Theta - $\Theta$
+
+$\Theta$ anger ett bounded limit, både övre och lägre värde.
+
+$f(n) = \Theta(g(n))$ if $f(n) = O(g(n))$ and $f(n)=\Omega(g(n))$
+
+*** Exempel
+
+```
+for i = to n do
+	for j = i do
+		print i, j
+```
+
+Denna är $\theta(n^2)$
+
+Talserien ser ut så här:
+
+$n, n-1, n-2...3,2,1$
+
+Det är samma som:
+
+$$
+\frac{(n+1)\cdot n}{2}
+$$
+
+Det ser vi är $\Theta(n^2)$
+
+*** Lutning på graf
+
+$T(n) = c\cdot n^2$
+
+$T(2n) = c \cdot (2n)^2 = c\cdot 4\cdot n^2$
+
+$T(2n)/T(n) = 4$
+
+** Vecka 4
+
+* Övningar
+** TODO Vecka 1
+*** 6.3
+We start with finding the biggest number, A[mid][x], in the mid column. This takes n time.
+
+We look at the neighbours of A[mid][x] to the right and left. Since it is the biggest number in the column we already know that the neighbours above and below are smaller.
+
+If the left and right neighbour are smaller or equal to A[mid][x], then we have found a peak.
+
+Else, lets say we have a neighbour that is larger to the right of A[mid][x], A[mid+1][x]. We then recurse on the right half and find the largest number in the mid column of right half of array.
+
+We might worry that there could be a value in the column to the right of the first mid column, A[mid+1][y] that we find that is large enough to be the biggest number in that column, but smaller than its neighbour to the left so that there actually is no peak in the right half.
+
+We can be sure that this never will happen because of the following. Since we have recursed right from A[mid], we know that there is a value in A[mid+1] that is bigger than the biggest value in A[mid]. If we find a new biggest value in A[mid+1] that number is bigger than the largest number in A[mid], and therefore larger than all numbers in A[mid], and because of this the peak can never "cross" over a line we already have checked.
+
+*** TODO 6.4
+If we recursively first split a square($n\times n$) in half vertically and horizontally we get the following series:
+
+$n+n\frac{2}+n\frac{4}+n\frac{8}...$
+
+This converges towards $2\times n$, which is the same as $\Theta (n)$
+
+The problem is we can't use the same solution as in 6.3, but taking turns splitting horizontally and vertically.
+
+If we do that the
+
+
+|     |      |     |     |     |     |
+| --- |  --- | --- | --- | --- | --- |
+|  10 |   14 |     |     |     |     |
+|  11 |   10 |     |     |     |     |
+|  10 |    9 |     |     |     |     |
+|  12 | 13!1 |     |     |     |     |
+|  10 |    9 |     |     |     |     |
+|  10 |   14 |  14 |  15 |  14 |  14 |
+|  10 |    9 |     |     |     |     |
+|  10 |    9 |     |     |     |     |
+|  10 |    9 |     |     |     |     |
+|  10 |    9 |     |     |     |     |
+|  10 |    9 |     |     |     |     |
+
+** Vecka 2
+*** 8.2
+#+begin_src C
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+void swap(int* A, int l, int r)
+{
+    int temp = A[l];
+    A[l] = A[r];
+    A[r] = temp;
+}
+
+void partition(int A[], int l, int r, int medianIndex)
+{
+    // since we haven't learned how to find median element in theta n, lets just assume first element is median to partition around.
+    // int median = A[l];
+    swap(A, l, medianIndex);
+    int i = l;
+    int j = r + 1;
+    for (;;) {
+        while (A[++i] < medianIndex) {
+            if (i == r) {
+                break;
+            }
+        }
+        while (A[--j] > medianIndex) {
+            if (j == l) {
+                break;
+            }
+        }
+        if (i >= j) {
+            break;
+        }
+        swap(A, i, j);
+        // We have now found two elements that should switch place.
+    }
+    swap(A, l, j);
+}
+
+// Since we have are given a median value in linear time from the exercise, lets just assume for simplicities sake that first value is median.
+// Since our actual value might not be the median value our sorting algorithm will be a bit slower, but it will still work.
+// Algorithm
+// We have our median at the start of array.
+// We go through start at array with pointer j, until we find a value that is larger than median. That value should be in right half.
+// We then go from back of with pointer k, until we find a value smaller than median. These two then switch places.
+
+int findK() int main()
+{
+    int A[] = { 10, 12, 11, 5, 6, 33 };
+    int A_size = sizeof(A) / sizeof(A[0]);
+    int l = 0;
+    int r = A_size - 1;
+
+    partition(A, l, r);
+    // printf("k is: %d\n", k);
+    // printf("k number is: %d\n", result);
+    return 0;
+}
+#+end_src
+
+*** 8.3
+#+begin_src C
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+void merge(int A[], int l, int m, int r)
+{
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+
+    int L[n1], R[n2];
+
+    for (i = 0; i < n1; i++)
+        L[i] = A[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = A[m + 1 + j];
+
+    i = 0;
+
+    j = 0;
+
+    k = l;
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            A[k] = L[i];
+            i++;
+        } else {
+            A[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1) {
+        A[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        A[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void mergeSort(int A[], int l, int r)
+{
+    if (l < r) {
+        int m = (l + r) / 2;
+
+        mergeSort(A, l, m);
+        mergeSort(A, m + 1, r);
+
+        merge(A, l, m, r);
+    }
+}
+void swap(int* A, int l, int r)
+{
+    int temp = A[l];
+    A[l] = A[r];
+    A[r] = temp;
+}
+
+void partition(int A[], int l, int r, int medianIndex)
+{
+    // since we haven't learned how to find median element in theta n, lets just assume first element is median to partition around.
+    // int median = A[l];
+    swap(A, l, medianIndex);
+    int i = l;
+    int j = r + 1;
+    for (;;) {
+        while (A[++i] < medianIndex) {
+            if (i == r) {
+                break;
+            }
+        }
+        while (A[--j] > medianIndex) {
+            if (j == l) {
+                break;
+            }
+        }
+        if (i >= j) {
+            break;
+        }
+        swap(A, i, j);
+        // We have now found two elements that should switch place.
+    }
+    swap(A, l, j);
+}
+int findMedian(int A[], int l, int r)
+{
+
+    int size = r - l + 1;
+    int copy[size];
+    for (int i = 0; i < size; i++) {
+        copy[i] = A[l + i];
+    }
+    mergeSort(copy, 0, size - 1);
+    int median = copy[size / 2];
+    for (int i = 0; i < size; i++) {
+        if (A[l + i] == median) {
+            return l + i;
+        }
+    }
+    return -1;
+}
+
+// Since we have are given a median value in linear time from the exercise, lets just assume for simplicities sake that first value is median.
+// Since our actual value might not be the median value our sorting algorithm will be a bit slower, but it will still work.
+// Algorithm
+// We have our median at the start of array.
+// We go through start at array with pointer j, until we find a value that is larger than median. That value should be in right half.
+// We then go from back of with pointer k, until we find a value smaller than median. These two then switch places.
+int findK(int A[], int k, int l, int r)
+{
+    for (;;) {
+        int mid = (l + r) / 2;
+        int medianIndex = findMedian(A, l, r);
+        partition(A, l, r, medianIndex);
+        if (r - l == 0) {
+            return A[mid];
+        }
+        if (k <= mid) {
+            r = mid;
+        }
+        if (k > mid) {
+            l = mid + 1;
+        }
+    }
+}
+int main()
+{
+    int A[] = { 10, 4, 12, 11, 5, 33, 1, 2, 6, 3 };
+    int A_size = sizeof(A) / sizeof(A[0]);
+    int l = 0;
+    int r = A_size - 1;
+    int medianIndex = findMedian(A, l, r);
+    // partition(A, l, r, medianIndex);
+    findK(A, 4, l, r);
+
+    // printf("k is: %d\n", k);
+    // printf("k number is: %d\n", result);
+    return 0;
+}
+
+#+end_src
+
+** TODO Vecka 3
+*** 5.3
+/Algoritme C kører 3 sekunder langsommere hver gang man fordobler størrelsen af input. Hvad er køretiden af algoritmen udtrykt i $\Theta$ -notation?/
+
+Algoritmen är $\Theta(log(n))$.
+
+| x |  y |
+|---+----|
+| 1 |  3 |
+| 2 |  6 |
+| 4 |  9 |
+| 8 | 12 |
+
+
+*** 6.4
+/Vis at $log(n!) = O(n\cdot log(n))$./
+
+$$
+log(n!) = log(1) + log(2)...+log(n-1)+log(n) = \frac{n\cdot log(n+1)}{2}
+$$
+
+Detta är så klart mindre än $O(n\cdot log(n))$, vilket är det vi ska visa.
+
+*** TODO 6.5
+*** 8.1
+#+begin_src C
+#include <stdio.h>
+
+struct pointers {
+    int left;
+    int right;
+};
+
+// This is n^3
+struct pointers findMaxSubarray(int* A, int n)
+{
+    struct pointers p;
+    p.left = 0;
+    p.right = 0;
+    int max = A[0];
+
+    for (int i = 0; i < n; i++) {
+        int a = A[i];
+        for (int j = i + 1; j < n; j++) {
+            int b = A[j];
+            a += b;
+            if (a > max) {
+                p.left = i;
+                p.right = j;
+                max = a;
+            }
+        }
+    }
+    return p;
+}
+
+int main()
+{
+    int A[] = { 1, 10, -8, -2, 12, 11, -1, 0  };
+    int A_size = sizeof(A) / sizeof(A[0]);
+    int l = 0;
+    int r = A_size - 1;
+    struct pointers p = findMaxSubarray(A, A_size);
+
+    printf("Left: %d\n", p.left);
+    printf("Right: %d\n", p.right);
+
+    return 0;
+}
+
+#+end_src
+
+*** 8.2
+/Giv en algoritme der finder et maksimalt delarray i A i $O(n^2)$ tid. Hint: Vis at man kan beregne summerne for alle delarrays i $O(1)$ tid per delarray./
+
+Om vi istället för att beräkna varje delarray från A[i]..A[j], så kan vi istället bara ta bort värdet av A[i-1] och lägga till värdet A[j] till en sum variabel.
+
+För en subarray på length n så är det totalt n beräkningar för samtliga subarrays av längd n.
+
+Vi gör detta n gånger, för subarrays av längd 1 till n.
+
+För en subarray på längd 1, så kör for loopen med variabeln k bara 1 gång, men den med variabel j kör n gånger. Det blir omvänt för en subarray på längd n.
+
+
+
+#+begin_src C
+#include <stdio.h>
+
+struct pointers {
+    int left;
+    int right;
+};
+
+struct pointers findMaxSubarray(int* A, int n)
+{
+    struct pointers p;
+    p.left = 0;
+    p.right = 0;
+    int max = A[0];
+
+    // 2
+    for (int i = 1; i <= n; i++) {
+        int sum = 0;
+        for (int j = 0; i + j <= n; j++) {
+            if (j == 0) {
+                for (int k = 0; k < i; k++) {
+                    sum += A[j + k];
+                }
+            } else {
+                sum -= A[j - 1];
+                sum += A[i + j - 1];
+            }
+            if (sum > max) {
+                p.left = j;
+                p.right = j + i - 1;
+                max = sum;
+            }
+        }
+        sum = 0;
+    }
+    return p;
+}
+
+int main()
+{
+    int A[] = { 1001, 0, 0, 0, 1000 };
+    int A_size = sizeof(A) / sizeof(A[0]);
+    int l = 0;
+    int r = A_size - 1;
+    struct pointers p = findMaxSubarray(A, A_size);
+
+    printf("Left: %d\n", p.left);
+    printf("Right: %d\n", p.right);
+
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:
+| Left:  | 0 |
+| Right: | 4 |
+
+** Vecka 4
+*** 1 Stakke og koer
+**** 1.1
+- 4
+- 4 1
+- 4 1 3
+- 4 1 -> 3
+- 4 1 8
+- 4 1 -> 8
+**** 1.2
+Vi lader de vokse in mot mitten från varsin ände. Vi har två variabler som håller reda på respektive stacks top index.
+**** 1.3
+#+begin_example
+    4
+  1 4
+3 1 4
+  3 1 -> 4
+8 3 1
+  8 3 -> 1
+#+end_example
+**** 1.4
+Vi har en stak som vi pushar til og en anden som vi popar fra. Om vi försöker popa från och den stacken är tom så flyttar vi över alla från vår push stack genom att poppa dem och lägga dem i pop stacken. Det kommer leda till att ordningen blir omvänd och när de lämnar den andra stacken så är det i den ordningen som en queue ska ge.
+*** 2 Opgave 5.1. fra eksamen 2011
+
+- DUTNRM
+
+*** 3 Algoritmer på hægtede lister
+**** 3.1 og 3.2
+Den räknar antalet element.
+**** 3.3 og 3.4
+Den lägger samman värdena på alla tal i den länkade listan.
+
+*** 4 Implementation af hægtede lister
+**** 4.1
+Deletar nästa element.
+
+
+**** 4.2
+Vi insertar t efter x.
+**** 4.3
+Den andra raden, ~t.next = x.next~ blir en självreferens för t.
+
+*** 5 Implementation af stakke og køer
+**** 5.1 Implementér en stak der kan indeholde heltal ved hjælp af en enkelt-hægtet liste.
+#+CAPTION: Stack implementation
+#+name: Stack with linked list
+#+begin_src js :results output
+function Node(val, next){
+    this.val = val;
+    this.next = next;
+}
+
+function Stack(){
+    this.sentinel = new Node(null, null)
+    this.pop = () => {
+        let val = this.sentinel.next.val;
+        this.sentinel.next = this.sentinel.next.next
+        return val;
+    }
+    this.push = (val) => {
+        const node = new Node(val, this.sentinel.next);
+        this.sentinel.next = node;
+    }
+}
+
+let stack = new Stack();
+stack.push(3);
+console.log(stack.sentinel)
+stack.push(5);
+console.log(stack.sentinel)
+let val = stack.pop();
+console.log("popped:", val)
+console.log(stack.sentinel);
+#+end_src
+
+#+RESULTS: Stack with linked list
+: Node { val: null, next: Node { val: 3, next: null } }
+: Node {
+:   val: null,
+:   next: Node { val: 5, next: Node { val: 3, next: null } }
+: }
+: popped: 5
+: Node { val: null, next: Node { val: 3, next: null } }
+
+**** 5.2 Implementér en kø der kan indeholde heltal ved hjælp af en enkelt-hægtet liste.
+#+CAPTION: Queue implementation
+#+name: Queue with linked list
+#+begin_src js :results output :exports both
+function Node(val, next){
+    this.val = val;
+    this.next = next;
+}
+
+function Queue(){
+    this.sentinel = new Node(null, null)
+    this.dequeue = () => {
+        let node = this.sentinel;
+        while(node.next.next != null){
+            node = node.next;
+        }
+        let val = node.next.val;
+        node.next = null;
+        return val;
+    }
+    this.enqueue = (val) => {
+        const node = new Node(val, this.sentinel.next);
+        this.sentinel.next = node;
+    }
+}
+
+let queue = new Queue();
+
+queue.enqueue(3);
+console.log(queue.sentinel)
+queue.enqueue(5);
+console.log(queue.sentinel)
+let val = queue.dequeue();
+console.log("dequeueing:", val)
+console.log(queue.sentinel);
+#+end_src
+
+#+RESULTS: Queue with linked list
+: Node { val: null, next: Node { val: 3, next: null } }
+: Node {
+:   val: null,
+:   next: Node { val: 5, next: Node { val: 3, next: null } }
+: }
+: dequeueing: 3
+: Node { val: null, next: Node { val: 5, next: null } }
+
+*** 7
+Vi skal ha styr pa x.next og x.next.next. Vi peger x.next pa x og sa gentager vi processen, men nu er x.next den som er x.
+#+CAPTION: Turn linked list
+#+name: Turn linked list
+#+begin_src js :results output :exports both
+function Node(val, next){
+    this.val = val;
+    this.next = next;
+}
+
+function reverseLinkedList(node){
+    let prevNode = null;
+    let nextNode = node.next;
+    while(nextNode != null){
+        node.next = prevNode;
+        prevNode = node;
+        node = nextNode;
+    }
+}
+
+
+let z = new Node(3, null);
+let y = new Node(44, z);
+let x = new Node(-7, y);
+
+
+
+#+end_src
+
+#+RESULTS: Turn linked list
+: Node {
+:   val: -7,
+:   next: Node {
+:     val: 44,
+:     next: Node { val: 3, next: null, reverse: [Function (anonymous)] },
+:     reverse: [Function (anonymous)]
+:   },
+:   reverse: [Function (anonymous)]
+: }
+
+
+
+*** 8 Død ved lampe
+32 fanger er fængslet på livstid i isolation. Fænglset indeholder 32 celler og et forhørskammer, forhørskammeret indeholder 32 lamper med lyskontakter, og fangerne får ikke mulighed for at se eller høre hinanden efter fængsling. Den onde fængselsvagt foreslår følgende spøg: Hver dag vælger fængselsvagten en tilfældig fange (ved at vælge et tilfældigt tal mellem 1 og 32), som kommer i forhørskammeret, hvor de har mulighed for både at observere og at tænde eller slukke for hver af de $k$ lamper. Fængselsvagten rører ikke ved lamperne, og til start er de alle slukkede.
+
+Til enhver tid må enhver fange sige: “Alle 32 fanger har været i forhørskammeret.” Hvis udsagnet er korrekt, bliver alle sat fri, hvis udsagnet er forkert, bliver alle henrettet. Inden de blev fængslet havde fangerne heldigvis rådført sig med hinanden og lagt en god strategi for, hvordan de skulle bære sig ad med at vinde over vagten.
+
+**** 8.1
+/Findes der en strategi så fangerne kan vinde over fængselsvagten hvis der er $k$ = 32 lyskontakter?/
+
+Hver fange tildeles en lampe fra 1..32, og om man varit där inne så tänder man sin lampa.
+**** 8.2
+/Hvis $k$ = 5?/
+
+Låt lamporna representera ett binärt tal med 5 1'or och 0'or. Det ger oss i talbas 10, 32 möjligheter, 0..31. Första gången man går in så höjer man värdet på det binära talet med ett.
+
+Nästa gång gör man ingenting.
+
+När värdet är 0b11111 så har alla varit inne.
+
+- 0b01010 -> 0b01011
+- 0b10101 -> 0b10110
+- etc...
+
+**** 8.3 [**]
+/Hvis $k = 1$?/
+
+Vi kan sige at fange no 1 er ansvarlig for at tænde for lampen. Hvis en anden fange kommer ind og han ikke har vaeret der tidliger så skal han slukke for den. Da fange no 1. kommer ind og lyset er slukke så ved han at MINDST 1 fange vaeret der inde for første gang. Når han har tændt lyset 31 gange så ved han at de allesammen vaeret der inde.
