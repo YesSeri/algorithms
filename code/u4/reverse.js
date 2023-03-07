@@ -6,7 +6,6 @@ function Node(val, next){
 function reverseLinkedList(node){
     let prevNode = null;
     let nextNode = node.next;
-    debugger;
     while(nextNode != null){
         node.next = prevNode;
         prevNode = node;

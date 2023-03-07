@@ -1,6 +1,6 @@
 :PROPERTIES:
 :END:
-#+STARTUP: show2levels
+#+STARTUP: overview
 
 * Egna noter
 ** Merge sort
@@ -371,6 +371,51 @@ $T(2n) = c \cdot (2n)^2 = c\cdot 4\cdot n^2$
 $T(2n)/T(n) = 4$
 
 ** Vecka 4
+** Vecka 5 - Graphs
+*** Vertices and edges
+- Vertice is the metro station
+- Edge is the road between them
+
+- Graf G = (V,E), undirected graph
+  - V = number of vertices
+
+  - E = number of edges
+
+  - n = |V|, m = |E|
+
+- walk
+
+- simple path
+  only visit each vertice once when walking
+
+- cycle
+
+- degree
+  number of edges on a vertice
+
+- connectivity
+*** Lille lemma
+Number of edges equals half
+
+*** Problem
+- Eulertur
+- Hamiltonkreds
+
+*** Representation
+**** Incidensmatrix
+adjacent $\theta(1)$ tid,
+neighbours $\theta(n)$ tid,
+insert $\theta(1)$ tid
+
+**** Incidensliste
+Memory: $\theta (n + sum\cdot deg(v)) = \theta(n+m)$
+
+| structure      | adjacent  | neighbours | insert    | memory |
+|----------------+-----------+------------+-----------+--------|
+| incidensmatrix | O(1)      | O(n)       | O(1)      | O(n^2) |
+| incidensliste  | O(deg(v)) | O(deg(v))  | O(deg(v)) | O(n+m) |
+
+
 
 * Övningar
 ** TODO Vecka 1
@@ -864,6 +909,8 @@ function Node(val, next){
 
 function Queue(){
     this.sentinel = new Node(null, null)
+    this.end = this.sentinel;
+
     this.dequeue = () => {
         let node = this.sentinel;
         while(node.next.next != null){
@@ -923,21 +970,15 @@ function reverseLinkedList(node){
 let z = new Node(3, null);
 let y = new Node(44, z);
 let x = new Node(-7, y);
+reverseLinkedList(x)
+console.log(z)
 
 
 
 #+end_src
 
 #+RESULTS: Turn linked list
-: Node {
-:   val: -7,
-:   next: Node {
-:     val: 44,
-:     next: Node { val: 3, next: null, reverse: [Function (anonymous)] },
-:     reverse: [Function (anonymous)]
-:   },
-:   reverse: [Function (anonymous)]
-: }
+: Node { val: 3, next: null }
 
 
 
@@ -967,3 +1008,100 @@ När värdet är 0b11111 så har alla varit inne.
 /Hvis $k = 1$?/
 
 Vi kan sige at fange no 1 er ansvarlig for at tænde for lampen. Hvis en anden fange kommer ind og han ikke har vaeret der tidliger så skal han slukke for den. Da fange no 1. kommer ind og lyset er slukke så ved han at MINDST 1 fange vaeret der inde for første gang. Når han har tændt lyset 31 gange så ved han at de allesammen vaeret der inde.
+** Vecka 5
+*** 1
+1.a
+
+incidensliste a
+|---+---+---+---|
+| 0 | 5 | 1 | 4 |
+| 1 | 0 | 2 | 6 |
+| 2 | 1 | 3 | 7 |
+| 3 | 4 | 8 | 2 |
+| 4 | 0 | 9 | 3 |
+| 5 | 0 | 7 | 8 |
+| 6 | 1 | 9 | 8 |
+| 7 | 2 | 5 | 9 |
+| 8 | 3 | 5 | 6 |
+| 9 | 6 | 7 | 4 |
+
+incidensmatric c
+
+|---+---+---+---+---+---|
+|   | 1 | 2 | 3 | 6 | 7 |
+| 1 | 0 | 0 | 1 | 1 | 0 |
+| 2 | 0 | 0 | 0 | 1 | 0 |
+| 3 | 1 | 0 | 0 | 0 | 0 |
+| 6 | 1 | 1 | 0 | 0 | 1 |
+| 7 | 0 | 0 | 0 | 1 | 0 |
+
+
+1.b
+
+
+*** 3
+do as bfs but use stack instead of queue
+
+*** 4
+Start på en tilfældig node i grafen. Tilføj til set visited.
+
+Gør DFS. Husk lastVisited node. Hvis du kommer til en nabo som har blevet visited og ikke er last visited så er den cyklisk.
+
+Hvis grafen er connected så er du færdig. Ellers søg på en ny random node som ikke er visited.
+
+
+*** 5
+Gør BFS.
+
+Husk vilken number of steps du er på gennem att adde det sammen i en map til din queue.
+
+Når du finder din korteste vej så bliver du ved med at køre BFS til steps stiger.
+
+numSolutions++ hver gang du finder en vej.
+*** 6
+
+**** 6.1
+f(n) =k^2
+**** 6.2
+ca 2 kanter per node, O(n)
+
+**** 6.3
+felt er node. vej uden væg er edge.
+**** 6.5
+Vi bruger algoritme opgave 4, og length visited skal være k*k. Koretid k^2
+
+*** 7
+**** 7.1
+a,b går. c ikke.
+
+
+
+**** 7.2
+x = lige tal.
+
+n knuder
+
+m = x*n
+
+
+
+
+
+
+*** 6
+**** 6.1
+f(n) = k^2
+
+**** 6.2
+n^2
+
+
+**** 6.5
+
+Use BFS
+- search should visit n^2 squares, else there are parts that are not connected
+- should never look at a square it has looked at before, else it is cyclic
+
+
+
+***
