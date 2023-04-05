@@ -1,5 +1,3 @@
-:PROPERTIES:
-:END:
 #+STARTUP: overview
 
 * Egna noter
@@ -215,6 +213,54 @@ We insert our value into the first free slot into the hash table. When we want t
 
   If we implement siblings as a linked list, and the parent node only has a pointer to the first sibling, then we don't need to know beforehand how much memory to allocate.
 
+** Vecka 7 - Heaps
+
+We store a heap in an array, and the index's are used instead of pointers. We start at idx 1, with root node.
+
+If we are at idx 2, the left child is 4 and right 5.
+
+Generalized it is the following way: If parent at =n= then left child is =2n= and right child at =2n + 1=
+
+This also gives us that the the parent of a node at idx k is at k/2
+
+This enables moving through tree structure without use of pointers, and we can store the data more efficiently this way, we don't need to waste space on pointers.
+
+A level must be fulled or packed to the left as to not leave any holes.
+
+#+begin_quote
+Since all but the last level is always filled, the height h of an n element heap is logarithmic because:
+
+$$\sum_{i=0}^{h} {2^i} = 2^{h+1} -1 \leq n$$
+#+end_quote
+
+
+If we assume a min-heap, the following is true. The value of a parent is always less or equal to the value of a child.
+
+Some thoughts:
+- Min value will always be root node.
+- Max value will always be a leaf node.
+- If we remove min value we will need to reconstruct the heap somehow.
+  - Commonly done by inserting the right most leaf value at the highest level and then letting it flow down until it is in a valid place.
+- How do we flow a inserted value down from root?
+  - Check it's children. If smaller than children it is in correct place, and we can stop.
+  - If bigger we switch place with the smallest of the children.
+  - Now redo this until we have found correct place
+
+**** Heap sort
+We take the root node, and put it into an array. Then we insert the last leaf node at the top and let it flow down. Then we redo this until all nodes are finished. This leaves us with a sorted array.
+
+pros
+- It takes $\Theta(nlog(n))$ which is the best a sorting algorithm can do.
+- It sorts in place, meaning it uses no extra memory. this sets it apart from quicksort and mergesort.
+
+cons
+- in practice it is usually a bit slower.
+
+
+
+
+
+
 * Lektioner
 ** Vecka 1
 ** Vecka 2
@@ -416,6 +462,14 @@ Memory: $\theta (n + sum\cdot deg(v)) = \theta(n+m)$
 | incidensliste  | O(deg(v)) | O(deg(v))  | O(deg(v)) | O(n+m) |
 
 
+** Vecka 6 - Weighted graphs
+
+*** Udkanter og udkanter
+- ud=ind=m $\sum_{v=v}deg-(v)=\sum_{v=v}deg+(v)=m$
+
+** Vecka 8 - Foren og find
+
+** Vecka 9
 
 * Övningar
 ** TODO Vecka 1
@@ -1074,8 +1128,6 @@ Vi bruger algoritme opgave 4, og length visited skal være k*k. Koretid k^2
 **** 7.1
 a,b går. c ikke.
 
-
-
 **** 7.2
 x = lige tal.
 
@@ -1083,25 +1135,172 @@ n knuder
 
 m = x*n
 
+Ved sidste skridt så går vi fra to nodes med ulige edges, 1 og 1, til 0. För vores förste skridt skal alle ha lige antal fordi så vil vi ved hvert skridt ha to nodes med ulige edges, hvilket kräves ved sidste skridt.
+
+En eulersti er en en euler tur, hvor vi starter fra skridt to, dvs vi er nödt til at starte med ulige antal edges på 2 knuder.
+
+*** 8
+- Diametern af en uorienteret graf G.
+  - Finn kortaste väg mellan samtliga par av knutar.
+  - Välj den längsta av dessa.
+**** 8.1
+=BFS= fra samtlige. Största värde på längsta väg är diameter.
+**** 8.2
+
+Välj tilfældig knude. DFS. BFS fra fundet DFS node.
+*** 9
+**** 9.1
+- AddEdge(u, v)
+
+  I vores incidensmatric sätter vi värdi 1 i nested array u,v. Tid O(1)
+- Adjacent(u, v)
+
+  I vores incidensmatric läser vi värdi i nested array u,v. Tid O(1)
+- Neighbors(v)
+  I vores incidensmatric läser vi samtlige värdi for linje v. Tid
+
+
+**** 9.2
+- AddEdge(u, v)
+  I vores incidensmatric sätter vi värdi 1 i nested array u,v. Tid O(1)
+
+- Adjacent(u, v)
+  I vores incidensmatric läser vi värdi i nested array u,v. Tid O(1)
+
+- Neighbors(v)
+  I vores incidensmatric läser vi samtlige värdi for linje v. Tid
+
+** Vecka 7
+*** 1
+**** 1.1
+1 & 3
+**** 1.2
+A
+**** 1.3
+Integer
+{null, 9, 7, 8, 6,5,7}
+[-,n1,n2,n3]
+4, 8, 11, 5, 21, ∗, 2, ∗
+4
+8,4
+11,8,4
+11,8,5,4
+21,11,8,5,4
+11,8,5,4
+11,8,5,4,2
+**** 1.4
+Ja.
+**** 1.5
+Find the leaf node with the lowest value.
+**** 1.6 TODO
+*** 2
+Vi bruger en min-heap.
+
+Vi sætter samtlige ind i vores hob.
+
+Vi sætter ind gennem at sætte den i første ledige bladnode. Hvis parent er større eller hvis den er root node så skift ikke plads med parent, ellers skift. Gentag dette rekursivt.
+
+Vi udflytter ringeste gennem at fjerne root node og sætte vores sidste blad node, sidste i array på dess plads. Nu er det muligvis en forkerrt værdi på root node. Vi sammen ligner med dess children og skifter plads med den child node som har lavest værdi(fordi det er en min-heap).
+
+*** 3
+**** 3.1
+
+Vi har en max heap. Vi fjerner største. Vi sætter ind sidste leaf node som root node og lader den flow down, O(log(n)). Vi gør dette m gange.
+
+**** 3.2
+
+Delete: Vi skiftter plads på node i index n og sidste node i array, og fjerner det nye sidste element.
+
+Vi sammenligner det nye element på idx n med parent. Hvis större, bubble up. Hvis ikke större, sammenlign med children og lad den bubble down i den retning som har störste child value (worst case log(n)).
+
+Fusion: Vi deletar de to element som beskrevet tidligere. Vi lägger dem sammen og bruger insert. $3\cdot log(n) = \Theta(log(n))$
+
+**** 3.3
+FindLargest:
+
+extract largest, reheap, do this m times. m * log(n)
+
+**** 3.4
+extractMin max-heap log(n):
+find last leaf node, keep track of index i . lg(n)
+
+parent idx = i / 2.
+leaf node idxs = [(i/2) + 1 .. i]
+
+go through leaf values.
+
+**help from ta**
+
+create a min-heap
+
+have to arrays that point to where the corresponding value is
+
+*** 5.
+ n = 2^(h+1) − 1
+
+$sum_{i=0}^{n=h}(2h)$
+
+ n(1) = 1
+
+ n + 1 = 2^(h+2) - 1
+
+$sum_{i=0}^{n=h+1}(2h+2))$
+
+** Vecka 8
+*** 1.1
+*** 1.2
+*** 1.3
+*** 1.4
+
+*** 1.5
+*** 1.6
+
+*** 1.7
+#+begin_src
+def init(n):
+    arr = arr of n length
+    sz = arr of n length
+
+    for i in 0..n:
+        arr[i] = i
+        sz[i] = 1
+
+    return (arr, sz)
+
+# Find
+def find(i, arr):
+    let r = i
+    while(r != arr[r]):
+        r = arr[r]
+    compress(r, i, arr)
+    return i
+
+
+# Weighted, Quick, compress
+def union(i, j, sz, arr):
+    int x = find(i, sz, arr)
+    int y = find(j, sz, arr)
+
+    if (sz[x] < sz[y]):
+        arr[x] = y
+        sz[y] += sz[x]
+    else:
+        arr[y] = x
+        sz[x] += sz[y]
+
+
+def compress(r, c, arr):
+    while(c != arr[c]):
+        arr[c] = p
 
 
 
 
+(sz, arr) = init(10)
+union(1, 3)
+union(3, 7)
+#+end_src
 
-*** 6
-**** 6.1
-f(n) = k^2
-
-**** 6.2
-n^2
-
-
-**** 6.5
-
-Use BFS
-- search should visit n^2 squares, else there are parts that are not connected
-- should never look at a square it has looked at before, else it is cyclic
-
-
-
-***
+*** 2
+** Vecka 9
+*** 1
