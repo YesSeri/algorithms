@@ -1304,3 +1304,15 @@ union(3, 7)
 *** 2
 ** Vecka 9
 *** 1
+*** 4
+4.1
+
+Den tyngsta kant bara vara en kant endast om den är connected till en knut som bara har en kant.
+
+4.2
+
+Det är samma förbindelser, och den totala längden har blivit $l_{cur} = l_{prev}\cdot c$
+
+4.3 og 4.4
+
+Om vi har en träd med två vikter som är samma, så kommer vi i en del fall kunna godtyckligt välja mellan vilken vi vill ha med. Om de bägge kanter är connected till samma knut kommer vi alltid kunna godtyckligt välja en kant. Om vi connectar bägge så har vi en kreds. Nu för att skapa et MST så väljer vi bort en av de två. Det är intuitivt självklart att det inte spelar någon roll vilken vi väljer.
